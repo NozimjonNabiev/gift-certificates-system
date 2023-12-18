@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'war'
+
+    repositories {
+        mavenCentral()
+    }
+
+    ext {
+        springVersion = '6.1.1'
+        junitVersion = '5.10.0'
+    }
+
+    dependencies {
+
+        // Logging
+        implementation 'org.slf4j:slf4j-api:2.0.6'
+        implementation 'org.slf4j:slf4j-simple:2.0.6'
+
+        // Project Lombok
+        compileOnly 'org.projectlombok:lombok:1.18.26'
+        annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+        // Spring Framework
+        implementation "org.springframework:spring-core:$springVersion"
+        implementation "org.springframework:spring-context:$springVersion"
+        implementation "org.springframework:spring-web:$springVersion"
+        implementation "org.springframework:spring-webmvc:$springVersion"
+        implementation "org.springframework:spring-jdbc:$springVersion"
+        implementation "org.springframework:spring-tx:$springVersion"
+        testImplementation "org.springframework:spring-test:$springVersion"
+
+        // Servlet and Validation APIs
+        implementation "jakarta.servlet:jakarta.servlet-api:6.0.0"
+        implementation "jakarta.validation:jakarta.validation-api:3.0.2"
+
+        // JUnit Jupiter
+        testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+
+        // Mockito and TestContainers
+        testImplementation "org.mockito:mockito-core:5.1.1"
+        testImplementation 'org.mockito:mockito-junit-jupiter:2.17.0'
+        testImplementation 'org.testcontainers:testcontainers:1.17.6'
+        testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
+        testImplementation 'org.testcontainers:postgresql:1.17.6'
+
+        // Repeated Lombok dependency for testing
+        testImplementation 'org.projectlombok:lombok:1.18.26'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

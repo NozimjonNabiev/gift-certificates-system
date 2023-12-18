@@ -1,0 +1,5 @@
+rootProject.name = 'gift-certificates-system'
+include 'controller'
+include 'repository'
+include 'service'
+

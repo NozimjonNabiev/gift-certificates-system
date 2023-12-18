@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group 'com.epam.esm'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ':repository')
+
+    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+}
+
+test {
+    useJUnitPlatform()
+}
