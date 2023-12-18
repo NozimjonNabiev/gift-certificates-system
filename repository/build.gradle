@@ -1,0 +1,20 @@
+group 'com.epam.esm'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Database Dependencies
+    implementation "org.postgresql:postgresql:42.5.3" // Postgresql
+    implementation 'org.apache.commons:commons-dbcp2:2.9.0' // Commons DBCP
+
+    // Test Dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2' // JUnit Jupiter
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.2' // JUnit Jupiter Engine
+}
+
+test {
+    useJUnitPlatform()
+}
