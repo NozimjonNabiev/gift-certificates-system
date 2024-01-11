@@ -34,6 +34,8 @@ public class DatabaseQueryConstants {
     public static final String DELETE_GIFT_CERTIFICATE = "DELETE FROM gift_certificate WHERE id = ?;";
 
     // tag_gift_certificate table queries
+
+    public static final String FIND_GIFT_CERTIFICATE_TAG_BY_ID = "SELECT COUNT(*) FROM tag_gift_certificate WHERE gift_certificate_id = ?;";
     public static final String INSERT_TAG_TO_GIFT_CERTIFICATE = "INSERT INTO tag_gift_certificate (gift_certificate_id, tag_id) VALUES (?, ?);";
     public static final String DELETE_ALL_GIFT_CERTIFICATE_TAGS = "DELETE FROM tag_gift_certificate WHERE gift_certificate_id = ?;";
     public static final String FIND_ALL_GIFT_CERTIFICATE_TAGS = "SELECT * FROM tag_gift_certificate INNER JOIN tag t ON t.id = tag_gift_certificate.tag_id WHERE gift_certificate_id = ?";

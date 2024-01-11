@@ -3,7 +3,7 @@ package com.epam.esm.exception;
 /**
  * Custom exception indicating an invalid request body with associated violations.
  */
-public class InvalidRequestBodyException extends Exception {
+public class InvalidRequestBodyException extends RuntimeException {
 
     private final Object[] violations;
 

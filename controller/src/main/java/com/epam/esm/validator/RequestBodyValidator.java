@@ -3,10 +3,10 @@ package com.epam.esm.validator;
 import com.epam.esm.exception.InvalidRequestBodyException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.validation.BindingResult;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for validating request bodies using Spring's BindingResult.
@@ -26,8 +26,8 @@ public class RequestBodyValidator {
         if (bindingResult.hasErrors()) {
             List<String> violations = bindingResult.getFieldErrors()
                     .stream()
-                    .map(fieldError -> fieldError.getDefaultMessage())
-                    .collect(Collectors.toList());
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
 
             log.error("Request body validation failed with {} violations", violations.size());
             throw new InvalidRequestBodyException(violations.toArray(new String[0]));
