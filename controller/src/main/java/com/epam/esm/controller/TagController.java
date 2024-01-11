@@ -64,7 +64,7 @@ public class TagController {
         RequestBodyValidator.validate(bindingResult);
         tagService.create(tags);
         log.info("Tag was successfully created.");
-        return new ResponseData<>(HttpStatus.OK, "Tag was successfully created!");
+        return new ResponseData<>(HttpStatus.CREATED, "Tag was successfully created!");
     }
 
     /**

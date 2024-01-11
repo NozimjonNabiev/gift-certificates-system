@@ -136,7 +136,10 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
                 giftCertificate.getPrice(),
                 giftCertificate.getDuration(),
                 giftCertificate.getId());
-        jdbcTemplate.update(DELETE_ALL_GIFT_CERTIFICATE_TAGS, giftCertificate.getId());
+        Integer count = jdbcTemplate.queryForObject(FIND_GIFT_CERTIFICATE_TAG_BY_ID, Integer.class, giftCertificate.getId());
+        if (count != null && count > 0) {
+            jdbcTemplate.update(DELETE_ALL_GIFT_CERTIFICATE_TAGS, giftCertificate.getId());
+        }
     }
 
     /**

@@ -36,7 +36,7 @@ public class TagServiceImpl implements TagService {
      * @throws NotFoundException If no tags are found.
      */
     @Override
-    public List<TagDTO> findAll() throws NotFoundException {
+    public List<TagDTO> findAll() {
         try {
             log.info("Finding all tags...");
             return tagRepository.findAll().stream().map(tagMapper::toTagDTO).toList();
@@ -54,7 +54,7 @@ public class TagServiceImpl implements TagService {
      * @throws NotFoundException If the tag with the given ID is not found.
      */
     @Override
-    public TagDTO findById(Long id) throws NotFoundException {
+    public TagDTO findById(Long id) {
         try {
             log.info("Finding tag by ID...");
             return tagMapper.toTagDTO(tagRepository.findById(id).orElseThrow(() ->
@@ -72,7 +72,7 @@ public class TagServiceImpl implements TagService {
      * @throws DataModificationException If creation of the tag fails.
      */
     @Override
-    public void create(TagDTO tagDTO) throws DataModificationException {
+    public void create(TagDTO tagDTO) {
         try {
             log.info("Creating new tag...");
             tagRepository.insert(tagMapper.toTag(tagDTO));
@@ -90,7 +90,7 @@ public class TagServiceImpl implements TagService {
      * @throws DataModificationException If deletion of the tag fails.
      */
     @Override
-    public void delete(Long id) throws NotFoundException, DataModificationException {
+    public void delete(Long id) {
         try {
             log.info("Deleting tag...");
             tagRepository.findById(id).orElseThrow(() ->

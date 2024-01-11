@@ -1,9 +1,11 @@
 package com.epam.esm.config;
 
+import io.micrometer.common.lang.NonNullApi;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+@NonNullApi
 public class SpringWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     @Override
@@ -24,10 +26,5 @@ public class SpringWebAppInitializer extends AbstractAnnotationConfigDispatcherS
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         super.onStartup(servletContext);
-        setSpringProfilesActive(servletContext, "prod");
-    }
-
-    private void setSpringProfilesActive(ServletContext servletContext, String profiles) {
-        servletContext.setInitParameter("spring.profiles.active", profiles);
     }
 }
