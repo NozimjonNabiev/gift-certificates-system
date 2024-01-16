@@ -68,18 +68,8 @@ public class TagController {
      * @return The created {@link TagDTO}.
      */
     @PostMapping
-<<<<<<< HEAD
     public TagDTO create(@RequestBody TagDTO tagDTO) {
         return tagFacade.create(tagDTO);
-=======
-    public ResponseData<Object> create(@RequestBody @Valid TagDTO tags, BindingResult bindingResult)
-            throws InvalidRequestBodyException, DataModificationException {
-        log.info("Processing post request to create tag...");
-        RequestBodyValidator.validate(bindingResult);
-        tagService.create(tags);
-        log.info("Tag was successfully created.");
-        return new ResponseData<>(HttpStatus.CREATED, "Tag was successfully created!");
->>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
     }
 
     /**
