@@ -1,85 +1,85 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.InvalidRequestBodyException;
-import com.epam.esm.exception.DataModificationException;
-import com.epam.esm.exception.NotFoundException;
-import com.epam.esm.response.ResponseData;
-import com.epam.esm.service.TagService;
-import com.epam.esm.validator.RequestBodyValidator;
+import com.epam.esm.exception.MessageHolder;
+import com.epam.esm.facade.TagFacade;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * Controller handling operations related to tags.
+ * {@code TagController} is a Spring MVC RestController class that handles
+ * HTTP requests related to tags. It provides endpoints for retrieving, creating,
+ * and deleting tags.
+ *
+ * <p>The class is annotated with {@link RestController}, {@link RequiredArgsConstructor},
+ * and {@link RequestMapping}, indicating that it is a controller component with
+ * constructor-based dependency injection and a base request mapping of "/api/tags".
+ *
+ * <p>Endpoints include:
+ * <ul>
+ *     <li>{@code GET /api/tags}: Retrieves all tags with pagination.</li>
+ *     <li>{@code GET /api/tags/{id}}: Retrieves a tag by its ID.</li>
+ *     <li>{@code POST /api/tags}: Creates a new tag.</li>
+ *     <li>{@code DELETE /api/tags/{id}}: Deletes a tag by its ID.</li>
+ * </ul>
+ *
+ * <p>Response types include {@link TagDTO} for successful operations and
+ * {@link MessageHolder} for error responses.
+ *
  */
-@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/tags")
+@RequestMapping("/api/tags")
 public class TagController {
-    private final TagService tagService;
+
+    private final TagFacade tagFacade;
 
     /**
-     * Retrieves all tags.
-     * @return ResponseData containing a list of TagDTO.
-     * @throws NotFoundException if no tags are found.
+     * Retrieves all tags with pagination.
+     *
+     * @param page The page number for pagination.
+     * @param size The number of items per page.
+     * @return A list of {@link TagDTO}.
      */
     @GetMapping
-    public ResponseData<List<TagDTO>> getAll() throws NotFoundException {
-        log.info("Processing get request for all tags...");
-        return new ResponseData<>(tagService.findAll());
+    public List<TagDTO> getAllByPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return tagFacade.findAllByPage(page, size);
     }
 
     /**
      * Retrieves a tag by its ID.
+     *
      * @param id The ID of the tag.
-     * @return ResponseData containing a TagDTO.
-     * @throws NotFoundException if the tag with the given ID is not found.
+     * @return The {@link TagDTO} for the specified ID.
      */
-    @GetMapping(value = "/{id}")
-    public ResponseData<TagDTO> getById(@PathVariable("id") Long id) throws NotFoundException {
-        log.info("Processing get request for tag with ID: {}", id);
-        return new ResponseData<>(tagService.findById(id));
+    @GetMapping("/{id}")
+    public TagDTO getById(@PathVariable long id) {
+        return tagFacade.findById(id);
     }
 
     /**
      * Creates a new tag.
-     * @param tags The TagDTO to be created.
-     * @param bindingResult The binding result.
-     * @return ResponseData indicating the success of the operation.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws DataModificationException if an error occurs during tag creation.
+     *
+     * @param tagDTO The {@link TagDTO} representing the new tag.
+     * @return The created {@link TagDTO}.
      */
     @PostMapping
-    public ResponseData<Object> create(@RequestBody @Valid TagDTO tags, BindingResult bindingResult)
-            throws InvalidRequestBodyException, DataModificationException {
-        log.info("Processing post request to create tag...");
-        RequestBodyValidator.validate(bindingResult);
-        tagService.create(tags);
-        log.info("Tag was successfully created.");
-        return new ResponseData<>(HttpStatus.OK, "Tag was successfully created!");
+    public TagDTO create(@RequestBody TagDTO tagDTO) {
+        return tagFacade.create(tagDTO);
     }
 
     /**
      * Deletes a tag by its ID.
-     * @param id The ID of the tag to be deleted.
-     * @return ResponseData indicating the success of the deletion.
-     * @throws NotFoundException if the tag to be deleted is not found.
-     * @throws DataModificationException if an error occurs during tag deletion.
+     *
+     * @param id The ID of the tag to delete.
+     * @return A {@link MessageHolder} indicating the result of the deletion.
      */
-    @DeleteMapping(value = "/{id}")
-    public ResponseData<Object> deleteById(@PathVariable("id") Long id)
-            throws NotFoundException, DataModificationException {
-        log.info("Processing delete request for tag with ID: {}", id);
-        tagService.delete(id);
-        log.info("Tag was successfully deleted.");
-        return new ResponseData<>(HttpStatus.OK, "Tag was successfully deleted!");
+    @DeleteMapping("/{id}")
+    public MessageHolder deleteById(@PathVariable long id) {
+        return tagFacade.deleteById(id);
     }
 }

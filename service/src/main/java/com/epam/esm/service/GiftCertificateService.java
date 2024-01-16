@@ -1,28 +1,73 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.dto.TagDTO;
-import com.epam.esm.dto.filter.SearchFilterDTO;
-import com.epam.esm.dto.filter.SortFilterDTO;
-import com.epam.esm.exception.DataModificationException;
-import com.epam.esm.exception.NotFoundException;
+import com.epam.esm.util.SearchFilter;
 
 import java.util.List;
 
+/**
+ * Service interface for managing {@link GiftCertificateDTO} entities.
+ *
+ */
 public interface GiftCertificateService {
-    List<GiftCertificateDTO> findAll() throws NotFoundException;
 
-    GiftCertificateDTO findById(Long id) throws NotFoundException;
+    /**
+     * Retrieves a list of gift certificates based on pagination parameters.
+     *
+     * @param page The page number.
+     * @param size The size of each page.
+     * @return A list of gift certificates matching the pagination criteria.
+     */
+    List<GiftCertificateDTO> findAllByPage(int page, int size);
 
-    List<GiftCertificateDTO> findByTag(TagDTO tag) throws NotFoundException;
+    /**
+     * Retrieves a gift certificate by its unique identifier.
+     *
+     * @param id The unique identifier of the gift certificate.
+     * @return The gift certificate with the given ID.
+     */
+    GiftCertificateDTO findById(Long id);
 
-    List<GiftCertificateDTO> findBySearchFilter(SearchFilterDTO searchFilter) throws NotFoundException;
+    /**
+     * Retrieves a list of gift certificates based on a search filter and pagination parameters.
+     *
+     * @param searchFilter The search filter criteria to filter gift certificates.
+     * @param page         The page number.
+     * @param size         The size of each page.
+     * @return A list of gift certificates matching the search filter and pagination criteria.
+     */
+    List<GiftCertificateDTO> findByFilterAndPage(SearchFilter searchFilter, int page, int size);
 
-    List<GiftCertificateDTO> findBySortFilter(SortFilterDTO sortFilter) throws NotFoundException;
+    /**
+     * Updates an existing gift certificate.
+     *
+     * @param id                   The unique identifier of the gift certificate to update.
+     * @param giftCertificateDTO The updated gift certificate data.
+     * @return The updated gift certificate.
+     */
+    GiftCertificateDTO update(Long id, GiftCertificateDTO giftCertificateDTO);
 
-    void create(GiftCertificateDTO certificate) throws DataModificationException;
+    /**
+     * Updates the price of a gift certificate by its unique identifier.
+     *
+     * @param id                   The unique identifier of the gift certificate to update.
+     * @param giftCertificateDTO The updated gift certificate data containing the new price.
+     * @return The updated gift certificate.
+     */
+    GiftCertificateDTO updatePriceById(Long id, GiftCertificateDTO giftCertificateDTO);
 
-    void update(GiftCertificateDTO certificate) throws NotFoundException, DataModificationException;
+    /**
+     * Creates a new gift certificate.
+     *
+     * @param giftCertificateDTO The gift certificate data to create.
+     * @return The created gift certificate.
+     */
+    GiftCertificateDTO create(GiftCertificateDTO giftCertificateDTO);
 
-    void delete(Long id) throws NotFoundException, DataModificationException;
+    /**
+     * Deletes a gift certificate by its unique identifier.
+     *
+     * @param id The unique identifier of the gift certificate to delete.
+     */
+    void deleteById(Long id);
 }

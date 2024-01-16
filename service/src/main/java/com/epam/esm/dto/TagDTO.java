@@ -1,23 +1,18 @@
 package com.epam.esm.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import org.springframework.hateoas.RepresentationModel;
 
 @Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TagDTO {
-
+@EqualsAndHashCode(callSuper = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TagDTO extends RepresentationModel<TagDTO> {
     private Long id;
-
-    @NotNull(message = "name should not be null")
-    @NotEmpty(message = "name should not be empty")
-    @Size(min = 3, max = 30, message = "name must be between 3 and 30 characters")
     private String name;
 }

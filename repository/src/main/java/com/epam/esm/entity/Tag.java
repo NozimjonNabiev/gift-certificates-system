@@ -1,16 +1,35 @@
 package com.epam.esm.entity;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Set;
 
 @Data
+@Entity
 @Builder
-public class Tag implements Comparable<Tag>{
+@Table(name = "tags")
+@ToString(exclude = "giftCertificates")
+@EqualsAndHashCode(exclude = "giftCertificates")
+@NoArgsConstructor
+@AllArgsConstructor
+public class Tag implements Identifiable, Comparable<Tag>{
+    @Id
+    @Column(name = "tag_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(
+            name = "name",
+            nullable = false,
+            unique = true)
     private String name;
 
+    @ManyToMany(mappedBy = "tags")
+    Set<GiftCertificate> giftCertificates;
+
     @Override
-    public int compareTo(Tag tag) {
-        return this.getName().compareTo(tag.getName());
+    public int compareTo(Tag o) {
+        return this.getName().compareTo(o.getName());
     }
 }
