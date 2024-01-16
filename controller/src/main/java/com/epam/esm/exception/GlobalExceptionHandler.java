@@ -1,7 +1,12 @@
 package com.epam.esm.exception;
 
+<<<<<<< HEAD
 import com.epam.esm.hateoas.HateoasAdder;
 import com.epam.esm.util.constants.ErrorCodeConstants;
+=======
+import com.epam.esm.response.ResponseData;
+import com.epam.esm.util.ErrorResponse;
+>>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,6 +16,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+<<<<<<< HEAD
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -18,6 +24,13 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Objects;
+=======
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import static com.epam.esm.util.constants.ErrorCodeConstants.*;
+
+>>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
 
 /**
  * {@code GlobalExceptionHandler} is a controller advice class responsible for handling
@@ -50,6 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request The WebRequest instance.
      * @return A ResponseEntity containing the error message and links.
      */
+<<<<<<< HEAD
     @Override
     @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ResponseEntity<Object> handleNoHandlerFoundException(
@@ -64,6 +78,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.NOT_FOUND, errorMessage, ErrorCodeConstants.NOT_FOUND_ERROR_CODE);
         messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, headers, status);
+=======
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidRequestBodyException.class)
+    public ResponseData<Object[]> handleInvalidRequestBodyException(InvalidRequestBodyException ex) {
+        log.info("Sending error message for invalid request body...");
+        return new ResponseData<>(new Object[]{INVALID_REQUEST_BODY_ERROR_CODE, ex.getViolations()}, HttpStatus.BAD_REQUEST, "Invalid request body");
+>>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
     }
 
     /**
@@ -76,6 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request The WebRequest instance.
      * @return A ResponseEntity containing the error message and links.
      */
+<<<<<<< HEAD
     @Override
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
@@ -92,6 +115,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.METHOD_NOT_ALLOWED, errorMessage.toString(), ErrorCodeConstants.METHOD_NOT_ALLOWED_ERROR_CODE);
         messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, headers, status);
+=======
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseData<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+        log.info("Sending error message for not found exception...");
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), NOT_FOUND_ERROR_CODE, HttpStatus.NOT_FOUND);
+        return new ResponseData<>(errorResponse);
+>>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
     }
 
     /**
@@ -101,6 +133,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex The exception instance.
      * @return A ResponseEntity containing the error message and links.
      */
+<<<<<<< HEAD
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<MessageHolder> handleMethodArgumentTypeMismatch(
@@ -143,5 +176,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         MessageHolder messageHolder = new MessageHolder(status, message, ErrorCodeConstants.INTERNAL_SERVER_ERROR_CODE);
         messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, messageHolder.getStatus());
+=======
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(DataModificationException.class)
+    public ResponseData<ErrorResponse> handleModificationException(DataModificationException ex) {
+        log.info("Sending error message for modification exception...");
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), MODIFICATION_ERROR_CODE, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseData<>(errorResponse);
+>>>>>>> a4283a6817df2d4f64063599579969d47ed4d223
     }
 }
