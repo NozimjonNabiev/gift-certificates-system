@@ -38,7 +38,6 @@ import java.util.Objects;
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    private final HateoasAdder<MessageHolder> messageHolderHateoasAdder;
 
     /**
      * Handles {@link NoHandlerFoundException} by returning a custom error message with
@@ -62,7 +61,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 + ex.getHttpMethod() + " " + ex.getRequestURL();
         MessageHolder messageHolder = new MessageHolder(
                 HttpStatus.NOT_FOUND, errorMessage, ErrorCodeConstants.NOT_FOUND_ERROR_CODE);
-        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, headers, status);
     }
 
@@ -90,7 +88,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .forEach(method -> errorMessage.append(method).append(" "));
         MessageHolder messageHolder = new MessageHolder(
                 HttpStatus.METHOD_NOT_ALLOWED, errorMessage.toString(), ErrorCodeConstants.METHOD_NOT_ALLOWED_ERROR_CODE);
-        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, headers, status);
     }
 
@@ -110,7 +107,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 + Objects.requireNonNull(ex.getRequiredType()).getName();
         MessageHolder messageHolder =
                 new MessageHolder(HttpStatus.BAD_REQUEST, errorMessage, ErrorCodeConstants.BAD_REQUEST_ERROR_CODE);
-        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
         return new ResponseEntity<>(messageHolder, messageHolder.getStatus());
     }
 
@@ -126,22 +122,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             EntityNotFoundException.class,
             EntityAlreadyExistsException.class})
     public ResponseEntity<MessageHolder> handleCustomException(Exception ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         String message = "Something went wrong :(";
+        int errorCode = ErrorCodeConstants.BAD_REQUEST_ERROR_CODE;
 
         if (ex instanceof ValidationException
                 || ex instanceof EntityAlreadyExistsException) {
-            status = HttpStatus.BAD_REQUEST;
             message = ex.getMessage();
         }
 
         if (ex instanceof EntityNotFoundException){
             status = HttpStatus.NOT_FOUND;
             message = ex.getMessage();
+            errorCode = ErrorCodeConstants.NOT_FOUND_ERROR_CODE;
         }
 
-        MessageHolder messageHolder = new MessageHolder(status, message, ErrorCodeConstants.INTERNAL_SERVER_ERROR_CODE);
-        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
+        MessageHolder messageHolder = new MessageHolder(status, message, errorCode);
         return new ResponseEntity<>(messageHolder, messageHolder.getStatus());
     }
 }

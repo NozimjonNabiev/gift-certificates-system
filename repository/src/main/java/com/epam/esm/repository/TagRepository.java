@@ -43,7 +43,7 @@ public interface TagRepository extends BaseRepository<Tag> {
      *
      * @return The special tag.
      */
-    Tag findMostUsedTagOfUserWithHighestOrderCost(Long userId);
+    List<Tag> findMostUsedTagOfUserWithHighestOrderCost(Long userId);
 
     /**
      * Saves a new or updates an existing tag.

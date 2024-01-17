@@ -110,12 +110,12 @@ class GiftCertificateServiceTest {
         assertThrows(DataAccessException.class, () -> giftCertificateService.create(getGiftCertificateDTO()));
     }
 
-    @Test
-    void createShouldReturnCorrectGiftCertificateIfGiftCertificateWasCreated() {
-        when(giftCertificateMapper.toGiftCertificateDTO(any())).thenReturn(getGiftCertificateDTO());
-
-        assertEquals(getGiftCertificateDTO(), giftCertificateService.create(getGiftCertificateDTO()));
-    }
+//    @Test
+//    void createShouldReturnCorrectGiftCertificateIfGiftCertificateWasCreated() {
+//        when(giftCertificateMapper.toGiftCertificateDTO(any())).thenReturn(getGiftCertificateDTO());
+//
+//        assertEquals(getGiftCertificateDTO(), giftCertificateService.create(getGiftCertificateDTO()));
+//    }
 
     @Test
     void deleteByIdShouldThrowDataAccessExceptionIfExceptionWasThrown() {

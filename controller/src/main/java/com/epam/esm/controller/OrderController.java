@@ -1,7 +1,14 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.OrderDTO;
-import com.epam.esm.facade.OrderFacade;
+import com.epam.esm.exception.ValidationException;
+import com.epam.esm.hateoas.HateoasAdder;
+import com.epam.esm.service.OrderService;
+import com.epam.esm.util.enums.GiftCertificateField;
+import com.epam.esm.util.enums.OrderField;
+import com.epam.esm.util.enums.UserField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +41,8 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    private final OrderFacade orderFacade;
+    private final OrderService orderService;
+    private final HateoasAdder<OrderDTO> orderHateoasAdder;
 
     /**
      * Retrieves all orders with pagination.
@@ -47,7 +55,11 @@ public class OrderController {
     public List<OrderDTO> getAllByPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return orderFacade.findAllByPage(page, size);
+        PaginationValidator.validate(page, size);
+
+        List<OrderDTO> orders = orderService.findAllByPage(page, size);
+        orderHateoasAdder.addLinksToEntityList(orders);
+        return orders;
     }
 
     /**
@@ -58,7 +70,11 @@ public class OrderController {
      */
     @GetMapping("/{id}")
     public OrderDTO getById(@PathVariable long id) {
-        return orderFacade.findById(id);
+        CustomValidator.validateId(OrderField.ID, id);
+
+        OrderDTO order = orderService.findById(id);
+        orderHateoasAdder.addLinksToEntity(order);
+        return order;
     }
 
     /**
@@ -69,7 +85,12 @@ public class OrderController {
      */
     @PostMapping
     public OrderDTO create(@RequestBody OrderDTO orderDTO) {
-        return orderFacade.create(orderDTO);
+        CustomValidator.validateId(UserField.ID, orderDTO.getUserId());
+        CustomValidator.validateId(GiftCertificateField.ID, orderDTO.getGiftCertificateId());
+
+        OrderDTO order = orderService.create(orderDTO);
+        orderHateoasAdder.addLinksToEntity(order);
+        return order;
     }
 
     /**
@@ -87,7 +108,23 @@ public class OrderController {
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return orderFacade.findByGiftCertificateOrUserId(giftCertificateId, userId, page, size);
+        if (giftCertificateId == null && userId == null || giftCertificateId != null && userId != null) {
+            throw new ValidationException("either giftCertificateId or userId should be passed, not both or neither");
+        }
+
+        PaginationValidator.validate(page, size);
+
+        List<OrderDTO> orders;
+        if (giftCertificateId != null) {
+            CustomValidator.validateId(GiftCertificateField.ID, giftCertificateId);
+            orders = orderService.findByGiftCertificateIdAndPage(giftCertificateId, page, size);
+        } else {
+            CustomValidator.validateId(UserField.ID, userId);
+            orders = orderService.findByUserIdAndPage(userId, page, size);
+        }
+
+        orderHateoasAdder.addLinksToEntityList(orders);
+        return orders;
     }
 
     /**
@@ -102,6 +139,10 @@ public class OrderController {
     public List<OrderDTO> getOrdersByUserIdAndPage(@PathVariable Long id,
                                                    @RequestParam(required = false, defaultValue = "0", name = "page") int page,
                                                    @RequestParam(required = false, defaultValue = "5", name = "size") int size) {
-        return orderFacade.findOrdersByUserIdAndPage(id, page, size);
+        PaginationValidator.validate(page, size);
+        CustomValidator.validateId(UserField.ID, id);
+        List<OrderDTO> orders = orderService.findByUserIdAndPage(id, page, size);
+        orderHateoasAdder.addLinksToEntityList(orders);
+        return orders;
     }
 }

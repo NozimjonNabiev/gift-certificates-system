@@ -33,7 +33,7 @@ public interface TagService {
      * @param userId The unique identifier of the user.
      * @return The most used tag of the user with the highest order cost.
      */
-    TagDTO findMostUsedTagOfUserWithHighestOrderCost(Long userId);
+    List<TagDTO> findMostUsedTagOfUserWithHighestOrderCost(Long userId);
 
     /**
      * Creates a new tag.

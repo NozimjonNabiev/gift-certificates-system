@@ -2,9 +2,16 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.exception.MessageHolder;
-import com.epam.esm.facade.GiftCertificateFacade;
+import com.epam.esm.hateoas.HateoasAdder;
+import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.util.SearchFilter;
+import com.epam.esm.util.enums.GiftCertificateField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.GiftCertificateValidator;
+import com.epam.esm.validator.PaginationValidator;
+import com.epam.esm.validator.SortValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +44,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("api/gift-certificates")
 public class GiftCertificateController {
-    private final GiftCertificateFacade giftCertificateFacade;
+    private final GiftCertificateService giftCertificateService;
+    private final HateoasAdder<GiftCertificateDTO> giftCertificateHateoasAdder;
+    private final HateoasAdder<MessageHolder> messageHolderHateoasAdder;
 
     /**
      * Retrieves all gift certificates with pagination.
@@ -49,7 +58,11 @@ public class GiftCertificateController {
     @GetMapping
     public List<GiftCertificateDTO> getAllByPage(@RequestParam(defaultValue = "0") int page,
                                                  @RequestParam(defaultValue = "5") int size) {
-        return giftCertificateFacade.findAllByPage(page, size);
+        PaginationValidator.validate(page, size);
+
+        List<GiftCertificateDTO> giftCertificates = giftCertificateService.findAllByPage(page, size);
+        giftCertificateHateoasAdder.addLinksToEntityList(giftCertificates);
+        return giftCertificates;
     }
 
     /**
@@ -60,7 +73,11 @@ public class GiftCertificateController {
      */
     @GetMapping("/{id}")
     public GiftCertificateDTO getById(@PathVariable Long id) {
-        return giftCertificateFacade.findById(id);
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.findById(id);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
@@ -75,7 +92,12 @@ public class GiftCertificateController {
     public List<GiftCertificateDTO> search(@RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "5") int size,
                                            @RequestBody(required = false) SearchFilter searchFilter) {
-        return giftCertificateFacade.findByFilter(searchFilter, page, size);
+        PaginationValidator.validate(page, size);
+        SortValidator.validate(searchFilter.sortType(), searchFilter.sortOrder());
+
+        List<GiftCertificateDTO> giftCertificates = giftCertificateService.findByFilterAndPage(searchFilter, page, size);
+        giftCertificateHateoasAdder.addLinksToEntityList(giftCertificates);
+        return giftCertificates;
     }
 
     /**
@@ -86,7 +108,11 @@ public class GiftCertificateController {
      */
     @PostMapping
     public GiftCertificateDTO create(@RequestBody GiftCertificateDTO giftCertificateDTO) {
-        return giftCertificateFacade.create(giftCertificateDTO);
+        GiftCertificateValidator.validate(giftCertificateDTO);
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.create(giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
@@ -99,7 +125,12 @@ public class GiftCertificateController {
     @PatchMapping("/{id}/price")
     public GiftCertificateDTO updatePriceById(@PathVariable Long id,
                                               @RequestBody GiftCertificateDTO giftCertificateDTO) {
-        return giftCertificateFacade.updatePriceById(id, giftCertificateDTO);
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+        GiftCertificateValidator.validatePrice(giftCertificateDTO.getPrice());
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.updatePriceById(id, giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
@@ -112,7 +143,11 @@ public class GiftCertificateController {
     @PatchMapping("/{id}")
     public GiftCertificateDTO update(@PathVariable Long id,
                                      @RequestBody GiftCertificateDTO giftCertificateDTO) {
-        return giftCertificateFacade.update(id, giftCertificateDTO);
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+        GiftCertificateValidator.validate(giftCertificateDTO);
+        GiftCertificateDTO giftCertificate = giftCertificateService.update(id, giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
@@ -123,6 +158,12 @@ public class GiftCertificateController {
      */
     @DeleteMapping("/{id}")
     public MessageHolder deleteById(@PathVariable Long id) {
-        return giftCertificateFacade.deleteById(id);
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+
+        giftCertificateService.deleteById(id);
+        MessageHolder messageHolder = new MessageHolder(
+                HttpStatus.OK, "gift certificate has been successfully deleted");
+        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
+        return messageHolder;
     }
 }

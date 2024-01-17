@@ -71,30 +71,34 @@ public class TagRepositoryImpl implements TagRepository {
      * @inheritDoc
      */
     @Override
-    public Tag findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
+    public List<Tag> findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
         String sql = """
            SELECT
-               t.tag_id,
-               t.name
-           FROM
-               tags t
-               JOIN gift_certificate_tag gct ON t.tag_id = gct.tag_id
-               JOIN gift_certificates g ON gct.gift_certificate_id = g.gift_certificate_id
-               JOIN orders o ON g.gift_certificate_id = o.gift_certificate_id
+               tag_id,
+               name
+           FROM (
+               SELECT
+                   t.tag_id,
+                   t.name,
+                   RANK() OVER (ORDER BY COUNT(o.id) DESC, SUM(o.price) DESC) AS rnk
+               FROM
+                   tags t
+                   JOIN gift_certificate_tag gct ON t.tag_id = gct.tag_id
+                   JOIN gift_certificates g ON gct.gift_certificate_id = g.gift_certificate_id
+                   JOIN orders o ON g.gift_certificate_id = o.gift_certificate_id
+               WHERE
+                   o.user_id = :userId
+               GROUP BY
+                   t.tag_id, t.name
+               ) ranked
            WHERE
-               o.user_id = :userId
-           GROUP BY
-               t.tag_id, t.name
-           ORDER BY
-               COUNT(o.id) DESC, SUM(o.price) DESC
-           LIMIT 1;
-           
-          """;
+               rnk = 1;
+       """;
 
         Query nativeQuery = entityManager.createNativeQuery(sql, Tag.class);
         nativeQuery.setParameter("userId", userId);
 
-        return (Tag) nativeQuery.getSingleResult();
+        return nativeQuery.getResultList();
     }
 
     /**

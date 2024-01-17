@@ -2,8 +2,14 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.MessageHolder;
-import com.epam.esm.facade.TagFacade;
+import com.epam.esm.hateoas.HateoasAdder;
+import com.epam.esm.service.TagService;
+import com.epam.esm.util.enums.TagField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.PaginationValidator;
+import com.epam.esm.validator.TagValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +39,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/tags")
 public class TagController {
-
-    private final TagFacade tagFacade;
+    private final TagService tagService;
+    private final HateoasAdder<TagDTO> tagHateoasAdder;
+    private final HateoasAdder<MessageHolder> messageHolderHateoasAdder;
 
     /**
      * Retrieves all tags with pagination.
@@ -47,7 +54,11 @@ public class TagController {
     public List<TagDTO> getAllByPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return tagFacade.findAllByPage(page, size);
+        PaginationValidator.validate(page, size);
+
+        List<TagDTO> tags = tagService.findAllByPage(page, size);
+        tagHateoasAdder.addLinksToEntityList(tags);
+        return tags;
     }
 
     /**
@@ -58,7 +69,11 @@ public class TagController {
      */
     @GetMapping("/{id}")
     public TagDTO getById(@PathVariable long id) {
-        return tagFacade.findById(id);
+        CustomValidator.validateId(TagField.ID, id);
+
+        TagDTO tag = tagService.findById(id);
+        tagHateoasAdder.addLinksToEntity(tag);
+        return tag;
     }
 
     /**
@@ -69,7 +84,11 @@ public class TagController {
      */
     @PostMapping
     public TagDTO create(@RequestBody TagDTO tagDTO) {
-        return tagFacade.create(tagDTO);
+        TagValidator.validate(tagDTO);
+
+        TagDTO tag = tagService.create(tagDTO);
+        tagHateoasAdder.addLinksToEntity(tag);
+        return tag;
     }
 
     /**
@@ -80,6 +99,12 @@ public class TagController {
      */
     @DeleteMapping("/{id}")
     public MessageHolder deleteById(@PathVariable long id) {
-        return tagFacade.deleteById(id);
+        CustomValidator.validateId(TagField.ID, id);
+
+        tagService.deleteById(id);
+        MessageHolder messageHolder = new MessageHolder(
+                HttpStatus.OK, "Tag was successfully deleted");
+        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
+        return messageHolder;
     }
 }

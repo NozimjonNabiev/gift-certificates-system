@@ -2,7 +2,12 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.dto.UserDTO;
-import com.epam.esm.facade.UserFacade;
+import com.epam.esm.hateoas.HateoasAdder;
+import com.epam.esm.service.TagService;
+import com.epam.esm.service.UserService;
+import com.epam.esm.util.enums.UserField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +38,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
-
-    private final UserFacade userFacade;
+    private final UserService userService;
+    private final TagService tagService;
+    private final HateoasAdder<UserDTO> userHateoasAdder;
+    private final HateoasAdder<TagDTO> tagHateoasAdder;
 
     /**
      * Retrieves all users with pagination.
@@ -47,7 +54,11 @@ public class UserController {
     public List<UserDTO> getAllByPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return userFacade.findAllByPage(page, size);
+        PaginationValidator.validate(page, size);
+
+        List<UserDTO> users = userService.findAllByPage(page, size);
+        userHateoasAdder.addLinksToEntityList(users);
+        return users;
     }
 
     /**
@@ -58,7 +69,11 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public UserDTO getById(@PathVariable long id) {
-        return userFacade.findById(id);
+        CustomValidator.validateId(UserField.ID, id);
+
+        UserDTO user = userService.findById(id);
+        userHateoasAdder.addLinksToEntity(user);
+        return user;
     }
 
     /**
@@ -67,8 +82,10 @@ public class UserController {
      * @param id The ID of the user.
      * @return The {@link TagDTO} representing the most used tag.
      */
-    @GetMapping("/{id}/most-used")
-    public TagDTO getMostUsedTag(@PathVariable Long id) {
-        return userFacade.findMostUsedTagOfUserWithHighestOrderCost(id);
+    @GetMapping("/{id}/most-used-tag")
+    public List<TagDTO> getMostUsedTag(@PathVariable Long id) {
+        List<TagDTO> tag = tagService.findMostUsedTagOfUserWithHighestOrderCost(id);
+        tagHateoasAdder.addLinksToEntityList(tag);
+        return tag;
     }
 }
