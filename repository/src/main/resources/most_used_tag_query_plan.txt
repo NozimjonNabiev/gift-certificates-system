@@ -1,0 +1,72 @@
+| QUERY PLAN |
+| :--- |
+| Subquery Scan on ranked  \(cost=39.10..39.14 rows=1 width=15\) \(actual time=1.017..1.024 rows=1 loops=1\) |
+|   Filter: \(ranked.rnk = 1\) |
+|   -&gt;  WindowAgg  \(cost=39.10..39.13 rows=1 width=39\) \(actual time=1.016..1.022 rows=1 loops=1\) |
+|         Run Condition: \(rank\(\) OVER \(?\) &lt;= 1\) |
+|         -&gt;  Sort  \(cost=39.10..39.11 rows=1 width=31\) \(actual time=0.981..0.984 rows=3 loops=1\) |
+|               Sort Key: \(count\(o.id\)\) DESC, \(sum\(o.price\)\) DESC |
+|               Sort Method: quicksort  Memory: 25kB |
+|               -&gt;  GroupAggregate  \(cost=39.07..39.09 rows=1 width=31\) \(actual time=0.918..0.933 rows=4 loops=1\) |
+|                     Group Key: t.tag\_id |
+|                     -&gt;  Sort  \(cost=39.07..39.08 rows=1 width=31\) \(actual time=0.901..0.905 rows=10 loops=1\) |
+|                           Sort Key: t.tag\_id |
+|                           Sort Method: quicksort  Memory: 25kB |
+|                           -&gt;  Nested Loop  \(cost=0.70..39.06 rows=1 width=31\) \(actual time=0.620..0.877 rows=10 loops=1\) |
+|                                 -&gt;  Nested Loop  \(cost=0.28..34.62 rows=1 width=47\) \(actual time=0.180..0.267 rows=10 loops=1\) |
+|                                       -&gt;  Nested Loop  \(cost=0.00..26.31 rows=1 width=40\) \(actual time=0.101..0.134 rows=10 loops=1\) |
+|                                             Join Filter: \(gct.gift\_certificate\_id = o.gift\_certificate\_id\) |
+|                                             Rows Removed by Join Filter: 62 |
+|                                             -&gt;  Seq Scan on orders o  \(cost=0.00..25.00 rows=6 width=24\) \(actual time=0.033..0.038 rows=12 loops=1\) |
+|                                                   Filter: \(user\_id = 1\) |
+|                                                   Rows Removed by Filter: 2 |
+|                                             -&gt;  Materialize  \(cost=0.00..1.04 rows=3 width=16\) \(actual time=0.005..0.006 rows=6 loops=12\) |
+|                                                   -&gt;  Seq Scan on gift\_certificate\_tag gct  \(cost=0.00..1.03 rows=3 width=16\) \(actual time=0.051..0.055 rows=6 loops=1\) |
+|                                       -&gt;  Index Scan using tags\_pkey on tags t  \(cost=0.28..8.29 rows=1 width=15\) \(actual time=0.010..0.010 rows=1 loops=10\) |
+|                                             Index Cond: \(tag\_id = gct.tag\_id\) |
+|                                 -&gt;  Index Only Scan using gift\_certificates\_pkey on gift\_certificates g  \(cost=0.43..4.45 rows=1 width=8\) \(actual time=0.060..0.060 rows=1 loops=10\) |
+|                                       Index Cond: \(gift\_certificate\_id = gct.gift\_certificate\_id\) |
+|                                       Heap Fetches: 7 |
+| Planning Time: 7.960 ms |
+| Execution Time: 1.322 ms |
+
+Query Execution Plan Description:
+
+The following is a breakdown of the query execution plan outlining the steps taken by the database optimizer to fulfill the SQL query. Each operation is detailed with its associated cost, actual time, and the number of rows processed.
+
+1. Subquery Scan on ranked (cost=39.10..39.14 rows=1 width=15) (actual time=1.017..1.024 rows=1 loops=1):
+   - The outermost operation that scans the result of the subquery.
+   - Applies a filter to retain only rows where the rank (ranked.rnk) is equal to 1.
+
+2. WindowAgg (cost=39.10..39.13 rows=1 width=39) (actual time=1.016..1.022 rows=1 loops=1):
+   - Performs window aggregation, applying a ranking function (rank()) over the result set.
+   - Sorts the result based on the count of order IDs (count(o.id)) and the sum of order prices (sum(o.price)).
+
+3. Sort (cost=39.10..39.11 rows=1 width=31) (actual time=0.981..0.984 rows=3 loops=1):
+   - Sorts the data based on the specified sort keys.
+   - Uses the quicksort method with a memory allocation of 25kB.
+
+4. GroupAggregate (cost=39.07..39.09 rows=1 width=31) (actual time=0.918..0.933 rows=4 loops=1):
+   - Groups the data by the tag ID (t.tag_id).
+   - Aggregates data within each group.
+
+5. Sort (cost=39.07..39.08 rows=1 width=31) (actual time=0.901..0.905 rows=10 loops=1):
+   - Sorts the result based on the tag ID.
+
+6. Nested Loop (cost=0.70..39.06 rows=1 width=31) (actual time=0.620..0.877 rows=10 loops=1):
+   - Executes a nested loop, combining multiple tables to retrieve the required data.
+   - Involves joins and filtering conditions to link the 'tags', 'gift_certificate_tag', 'gift_certificates', and 'orders' tables.
+
+7. Index Scan using tags_pkey on tags t (cost=0.28..8.29 rows=1 width=15) (actual time=0.010..0.010 rows=1 loops=10):
+   - Performs an index scan on the 'tags' table to retrieve tag information.
+
+8. Index Only Scan using gift_certificates_pkey on gift_certificates g (cost=0.43..4.45 rows=1 width=8) (actual time=0.060..0.060 rows=1 loops=10):
+   - Executes an index-only scan on the 'gift_certificates' table to fetch gift certificate details.
+
+9. Planning Time: 7.960 ms:
+   - Indicates the time taken by the database planner to generate the query plan.
+
+10. Execution Time: 1.322 ms:
+    - Reflects the total time taken for query execution.
+
+The query is optimized for efficiency, utilizing various index scans, nested loops, and aggregation methods to extract the most used tag for a user with the highest order cost.

@@ -92,21 +92,21 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
         query.setMaxResults(pagination.getLimit());
 
         return query.getResultList();
-}
+    }
 
-/**
- * @inheritDoc
- */
-@Override
-public void save(GiftCertificate giftCertificate) {
-    entityManager.persist(giftCertificate);
-}
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void save(GiftCertificate giftCertificate) {
+        entityManager.persist(giftCertificate);
+    }
 
-/**
- * @inheritDoc
- */
-@Override
-public void delete(GiftCertificate giftCertificate) {
-    entityManager.remove(giftCertificate);
-}
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void delete(GiftCertificate giftCertificate) {
+        entityManager.remove(giftCertificate);
+    }
 }
