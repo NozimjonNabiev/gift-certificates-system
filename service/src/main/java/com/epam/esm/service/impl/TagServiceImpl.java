@@ -1,104 +1,75 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exception.DataModificationException;
-import com.epam.esm.exception.NotFoundException;
-import com.epam.esm.repository.repository.TagRepository;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.exception.EntityAlreadyExistsException;
+import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
+import com.epam.esm.util.Pagination;
 import com.epam.esm.util.mapper.TagMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.epam.esm.util.ExceptionMessage.*;
-
 /**
- * Implementation of the TagService interface that provides business logic related to tags.
+ * Implementation of the {@link TagService} interface.
  */
-@Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
-
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
 
     /**
-     * Retrieves all tags.
-     *
-     * @return List of all tags in DTO format.
-     * @throws NotFoundException If no tags are found.
+     * @inheritDoc
      */
     @Override
-    public List<TagDTO> findAll() {
-        try {
-            log.info("Finding all tags...");
-            return tagRepository.findAll().stream().map(tagMapper::toTagDTO).toList();
-        } catch (DataAccessException ex) {
-            log.error("Failed to find tags: {}", ex.getMessage());
-            throw new NotFoundException(TAGS_NOT_FOUND, ex);
-        }
+    public List<TagDTO> findAllByPage(int page, int size) {
+        Pagination pagination = new Pagination(page, size);
+        return tagRepository.findAllByPage(pagination)
+                .stream().map(tagMapper::toTagDTO).toList();
     }
 
     /**
-     * Retrieves a tag by ID.
-     *
-     * @param id The ID of the tag.
-     * @return The tag in DTO format.
-     * @throws NotFoundException If the tag with the given ID is not found.
+     * @inheritDoc
      */
     @Override
     public TagDTO findById(Long id) {
-        try {
-            log.info("Finding tag by ID...");
-            return tagMapper.toTagDTO(tagRepository.findById(id).orElseThrow(() ->
-                    new EmptyResultDataAccessException("Tag not found by ID: " + id, 1)));
-        } catch (EmptyResultDataAccessException ex) {
-            log.error("Failed to find tag by ID: {}", ex.getMessage());
-            throw new NotFoundException(TAG_ID_NOT_FOUND, id);
-        }
+        return tagMapper.toTagDTO(tagRepository.findById(id));
     }
 
     /**
-     * Creates a new tag.
-     *
-     * @param tagDTO The tag data to create.
-     * @throws DataModificationException If creation of the tag fails.
+     * @inheritDoc
      */
     @Override
-    public void create(TagDTO tagDTO) {
-        try {
-            log.info("Creating new tag...");
-            tagRepository.insert(tagMapper.toTag(tagDTO));
-        } catch (DataAccessException ex) {
-            log.error("Failed to create tag: {}", ex.getMessage());
-            throw new DataModificationException(TAG_CREATE_FAILED, ex);
-        }
+    public List<TagDTO> findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
+        return tagRepository.findMostUsedTagOfUserWithHighestOrderCost(userId).stream()
+                .map(tagMapper::toTagDTO).toList();
     }
 
     /**
-     * Deletes a tag by ID.
-     *
-     * @param id The ID of the tag to delete.
-     * @throws NotFoundException        If the tag to delete is not found.
-     * @throws DataModificationException If deletion of the tag fails.
+     * @inheritDoc
      */
     @Override
-    public void delete(Long id) {
-        try {
-            log.info("Deleting tag...");
-            tagRepository.findById(id).orElseThrow(() ->
-                    new NotFoundException(TAG_ID_NOT_FOUND, id));
-            tagRepository.delete(id);
-        } catch (DataAccessException ex) {
-            log.error("Failed to delete tag: {}", ex.getMessage());
-            throw new DataModificationException(TAG_DELETE_FAILED, ex);
+    @Transactional
+    public TagDTO create(TagDTO tagDTO) {
+        Tag tag = tagMapper.toTag(tagDTO);
+        if (tagRepository.findByName(tag.getName()).isPresent()) {
+            throw new EntityAlreadyExistsException("Tag with such name already exists");
         }
+
+        tagRepository.save(tag);
+        return tagMapper.toTagDTO(tag);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        tagRepository.delete(tagRepository.findById(id));
     }
 }

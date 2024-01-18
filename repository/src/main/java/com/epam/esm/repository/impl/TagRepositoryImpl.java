@@ -1,82 +1,130 @@
 package com.epam.esm.repository.impl;
 
-import com.epam.esm.entity.Tag;
-import com.epam.esm.repository.repository.TagRepository;
-import com.epam.esm.util.mapper.TagRowMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.epam.esm.entity.*;
+import com.epam.esm.exception.EntityNotFoundException;
+import com.epam.esm.repository.TagRepository;
+import com.epam.esm.util.Pagination;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.epam.esm.util.DatabaseQueryConstants.*;
+import java.util.Set;
 
 /**
- * Repository implementation for handling operations related to Tags in the database.
+ * Implementation of the {@link TagRepository} interface.
  */
-@Slf4j
 @Repository
-@RequiredArgsConstructor
 public class TagRepositoryImpl implements TagRepository {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final TagRowMapper giftTagRowMapper;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
-     * Retrieves all Tags from the database.
-     *
-     * @return List of all Tag objects.
+     * @inheritDoc
      */
     @Override
-    public List<Tag> findAll() {
-        log.info("Querying all rows from gift tag table...");
-        return jdbcTemplate.query(FIND_ALL_TAGS, giftTagRowMapper);
+    public List<Tag> findAllByPage(Pagination pagination) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
+        Root<Tag> root = criteriaQuery.from(Tag.class);
+
+        criteriaQuery.select(root);
+        TypedQuery<Tag> query = entityManager.createQuery(criteriaQuery);
+        query.setFirstResult(pagination.getOffset());
+        query.setMaxResults(pagination.getLimit());
+
+        return query.getResultList();
     }
 
     /**
-     * Finds a Tag by its ID.
-     *
-     * @param id The ID of the Tag to find.
-     * @return Optional containing the Tag if found, otherwise empty.
+     * @inheritDoc
      */
     @Override
-    public Optional<Tag> findById(Long id) {
-        log.info("Querying a row from gift tag table by id...");
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_TAG_BY_ID, giftTagRowMapper, id));
+    public Tag findById(Long id) {
+        Tag tag = entityManager.find(Tag.class, id);
+        return Optional.ofNullable(tag)
+                .orElseThrow(() -> new EntityNotFoundException("Failed to find tag by id " + id));
     }
 
     /**
-     * Inserts a new Tag into the database.
-     *
-     * @param giftTag The Tag to be inserted.
-     * @return The ID of the newly inserted Tag.
+     * @inheritDoc
      */
     @Override
-    public Long insert(Tag giftTag) {
-        log.info("Adding new row into gift tag table...");
-        return jdbcTemplate.queryForObject(INSERT_TAG, Long.class, giftTag.getName());
+    public Optional<Tag> findByName(String name) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
+        Root<Tag> root = criteriaQuery.from(Tag.class);
+
+        criteriaQuery.select(root)
+                .where(criteriaBuilder.equal(root.get("name"), name));
+
+        TypedQuery<Tag> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList().stream().findFirst();
     }
 
     /**
-     * Updates an existing Tag in the database.
-     *
-     * @param giftTag The Tag to be updated.
+     * @inheritDoc
      */
     @Override
-    public void update(Tag giftTag) {
-        // Task requirement does not include update for tags
+    public List<Tag> findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
+        String sql = """
+           SELECT
+               tag_id,
+               name
+           FROM (
+               SELECT
+                   t.tag_id,
+                   t.name,
+                   RANK() OVER (ORDER BY COUNT(o.id) DESC, SUM(o.price) DESC) AS rnk
+               FROM
+                   tags t
+                   JOIN gift_certificate_tag gct ON t.tag_id = gct.tag_id
+                   JOIN gift_certificates g ON gct.gift_certificate_id = g.gift_certificate_id
+                   JOIN orders o ON g.gift_certificate_id = o.gift_certificate_id
+               WHERE
+                   o.user_id = :userId
+               GROUP BY
+                   t.tag_id, t.name
+               ) ranked
+           WHERE
+               rnk = 1;
+       """;
+
+        Query nativeQuery = entityManager.createNativeQuery(sql, Tag.class);
+        nativeQuery.setParameter("userId", userId);
+
+        return nativeQuery.getResultList();
     }
 
     /**
-     * Deletes a Tag from the database based on its ID.
-     *
-     * @param id The ID of the Tag to delete.
+     * @inheritDoc
      */
     @Override
-    public void delete(Long id) {
-        log.info("Deleting row from gift tag table...");
-        jdbcTemplate.update(DELETE_TAG, id);
+    public void save(Tag tag) {
+        entityManager.persist(tag);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setTags(GiftCertificate giftCertificate, Set<Tag> tags) {
+        for (Tag tag : tags) {
+            giftCertificate.getTags().add(tag);
+        }
+        entityManager.merge(giftCertificate);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void delete(Tag tag) {
+        entityManager.remove(tag);
     }
 }
