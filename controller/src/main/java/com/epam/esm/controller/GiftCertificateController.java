@@ -1,161 +1,169 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
-import com.epam.esm.dto.TagDTO;
-import com.epam.esm.dto.filter.SearchFilterDTO;
-import com.epam.esm.dto.filter.SortFilterDTO;
-import com.epam.esm.exception.InvalidRequestBodyException;
-import com.epam.esm.exception.DataModificationException;
-import com.epam.esm.exception.NotFoundException;
-import com.epam.esm.response.ResponseData;
+import com.epam.esm.exception.MessageHolder;
+import com.epam.esm.hateoas.HateoasAdder;
 import com.epam.esm.service.GiftCertificateService;
-import com.epam.esm.validator.RequestBodyValidator;
-import jakarta.validation.Valid;
+import com.epam.esm.util.SearchFilter;
+import com.epam.esm.util.enums.GiftCertificateField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.GiftCertificateValidator;
+import com.epam.esm.validator.PaginationValidator;
+import com.epam.esm.validator.SortValidator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * Controller handling operations related to gift certificates.
+ * {@code GiftCertificateController} is a Spring MVC RestController class that handles
+ * HTTP requests related to gift certificates. It provides endpoints for retrieving,
+ * searching, creating, updating, and deleting gift certificates.
+ *
+ * <p>The class is annotated with {@link RestController}, {@link RequiredArgsConstructor},
+ * and {@link RequestMapping}, indicating that it is a controller component with
+ * constructor-based dependency injection and a base request mapping of "/api/gift-certificates".
+ *
+ * <p>Endpoints include:
+ * <ul>
+ *     <li>{@code GET /api/gift-certificates}: Retrieves all gift certificates with pagination.</li>
+ *     <li>{@code GET /api/gift-certificates/{id}}: Retrieves a gift certificate by its ID.</li>
+ *     <li>{@code POST /api/gift-certificates/search}: Searches for gift certificates based on filters.</li>
+ *     <li>{@code POST /api/gift-certificates}: Creates a new gift certificate.</li>
+ *     <li>{@code PATCH /api/gift-certificates/{id}/price}: Updates the price of a gift certificate by its ID.</li>
+ *     <li>{@code PATCH /api/gift-certificates/{id}}: Updates a gift certificate by its ID.</li>
+ *     <li>{@code DELETE /api/gift-certificates/{id}}: Deletes a gift certificate by its ID.</li>
+ * </ul>
+ *
+ * <p>Response types include {@link GiftCertificateDTO} for successful operations and
+ * {@link MessageHolder} for error responses.
+ *
  */
-@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/gift-certificates")
+@RequestMapping("api/gift-certificates")
 public class GiftCertificateController {
     private final GiftCertificateService giftCertificateService;
+    private final HateoasAdder<GiftCertificateDTO> giftCertificateHateoasAdder;
+    private final HateoasAdder<MessageHolder> messageHolderHateoasAdder;
 
     /**
-     * Retrieves all gift certificates.
-     * @return ResponseData containing a list of GiftCertificateDTO.
-     * @throws NotFoundException if no certificates are found.
+     * Retrieves all gift certificates with pagination.
+     *
+     * @param page The page number for pagination.
+     * @param size The number of items per page.
+     * @return A list of {@link GiftCertificateDTO}.
      */
     @GetMapping
-    public ResponseData<List<GiftCertificateDTO>> getAll() throws NotFoundException {
-        log.info("Processing get request for all certificates...");
-        return new ResponseData<>(giftCertificateService.findAll());
+    public List<GiftCertificateDTO> getAllByPage(@RequestParam(defaultValue = "0") int page,
+                                                 @RequestParam(defaultValue = "5") int size) {
+        PaginationValidator.validate(page, size);
+
+        List<GiftCertificateDTO> giftCertificates = giftCertificateService.findAllByPage(page, size);
+        giftCertificateHateoasAdder.addLinksToEntityList(giftCertificates);
+        return giftCertificates;
     }
 
     /**
      * Retrieves a gift certificate by its ID.
+     *
      * @param id The ID of the gift certificate.
-     * @return ResponseData containing a GiftCertificateDTO.
-     * @throws NotFoundException if the gift certificate with the given ID is not found.
+     * @return The {@link GiftCertificateDTO} for the specified ID.
      */
-    @GetMapping(value = "/{id}")
-    public ResponseData<GiftCertificateDTO> getById(@PathVariable("id") Long id) throws NotFoundException {
-        log.info("Processing get request for gift certificate by id...");
-        return new ResponseData<>(giftCertificateService.findById(id));
+    @GetMapping("/{id}")
+    public GiftCertificateDTO getById(@PathVariable Long id) {
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.findById(id);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
-     * Retrieves gift certificates by tag.
-     * @param tag The tag to search for.
-     * @param bindingResult The binding result.
-     * @return ResponseData containing a list of GiftCertificateDTO.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws NotFoundException if no certificates are found for the given tag.
+     * Searches for gift certificates based on filters.
+     *
+     * @param page         The page number for pagination.
+     * @param size         The number of items per page.
+     * @param searchFilter The {@link SearchFilter} object containing search criteria.
+     * @return A list of {@link GiftCertificateDTO} matching the search criteria.
      */
+    @PostMapping("/search")
+    public List<GiftCertificateDTO> search(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "5") int size,
+                                           @RequestBody(required = false) SearchFilter searchFilter) {
+        PaginationValidator.validate(page, size);
+        SortValidator.validate(searchFilter.sortType(), searchFilter.sortOrder());
 
-    @PostMapping(value = "/tag")
-    public ResponseData<List<GiftCertificateDTO>> getByTag(@RequestBody @Valid TagDTO tag,
-                                                       BindingResult bindingResult)
-            throws InvalidRequestBodyException, NotFoundException {
-        log.info("Processing post request for certificates by tags...");
-        RequestBodyValidator.validate(bindingResult);
-        return new ResponseData<>(giftCertificateService.findByTag(tag));
-    }
-
-    /**
-     * Retrieves gift certificates by search filter criteria.
-     * @param searchFilter The search filter criteria.
-     * @param bindingResult The binding result.
-     * @return ResponseData containing a list of GiftCertificateDTO.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws NotFoundException if no certificates are found based on the search filter.
-     */
-    @PostMapping(value = "/search")
-    public ResponseData<List<GiftCertificateDTO>> getBySearchFilter(@RequestBody @Valid SearchFilterDTO searchFilter,
-                                                                BindingResult bindingResult)
-            throws InvalidRequestBodyException, NotFoundException {
-        log.info("Processing post request for certificates by search filter...");
-        RequestBodyValidator.validate(bindingResult);
-        return new ResponseData<>(giftCertificateService.findBySearchFilter(searchFilter));
-    }
-
-    /**
-     * Retrieves gift certificates by sort filter criteria.
-     * @param sortFilter The sort filter criteria.
-     * @param bindingResult The binding result.
-     * @return ResponseData containing a list of GiftCertificateDTO.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws NotFoundException if no certificates are found based on the sort filter.
-     */
-    @PostMapping(value = "/sort")
-    public ResponseData<List<GiftCertificateDTO>> getBySortFilter(@RequestBody SortFilterDTO sortFilter,
-                                                              BindingResult bindingResult)
-            throws InvalidRequestBodyException, NotFoundException {
-        log.info("Processing post request for certificates by sort filter...");
-        RequestBodyValidator.validate(bindingResult);
-        return new ResponseData<>(giftCertificateService.findBySortFilter(sortFilter));
+        List<GiftCertificateDTO> giftCertificates = giftCertificateService.findByFilterAndPage(searchFilter, page, size);
+        giftCertificateHateoasAdder.addLinksToEntityList(giftCertificates);
+        return giftCertificates;
     }
 
     /**
      * Creates a new gift certificate.
-     * @param giftCertificate The GiftCertificateDTO to be created.
-     * @param bindingResult The binding result.
-     * @return ResponseData indicating the success of the operation.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws DataModificationException if an error occurs during certificate creation.
+     *
+     * @param giftCertificateDTO The {@link GiftCertificateDTO} representing the new gift certificate.
+     * @return The created {@link GiftCertificateDTO}.
      */
     @PostMapping
-    public ResponseData<Object> create(@RequestBody @Valid GiftCertificateDTO giftCertificate,
-                                       BindingResult bindingResult)
-            throws InvalidRequestBodyException, DataModificationException {
-        log.info("Processing post request for creating a new certificate...");
-        RequestBodyValidator.validate(bindingResult);
-        giftCertificateService.create(giftCertificate);
-        log.info("Certificate was successfully created...");
-        return new ResponseData<>(HttpStatus.OK, "Certificate was successfully created!");
+    public GiftCertificateDTO create(@RequestBody GiftCertificateDTO giftCertificateDTO) {
+        GiftCertificateValidator.validate(giftCertificateDTO);
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.create(giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
-     * Updates an existing gift certificate.
-     * @param giftCertificate The updated GiftCertificateDTO.
-     * @param bindingResult The binding result.
-     * @return ResponseData indicating the success of the operation.
-     * @throws InvalidRequestBodyException if the request body is invalid.
-     * @throws NotFoundException if the gift certificate to be updated is not found.
-     * @throws DataModificationException if an error occurs during gift certificate update.
+     * Updates the price of a gift certificate by its ID.
+     *
+     * @param id                  The ID of the gift certificate.
+     * @param giftCertificateDTO The {@link GiftCertificateDTO} containing the updated price.
+     * @return The updated {@link GiftCertificateDTO}.
      */
-    @PatchMapping
-    public ResponseData<Object> edit(@RequestBody @Valid GiftCertificateDTO giftCertificate,
-                                     BindingResult bindingResult)
-            throws InvalidRequestBodyException, NotFoundException, DataModificationException {
-        log.info("Processing patch request for editing gift certificate...");
-        RequestBodyValidator.validate(bindingResult);
-        giftCertificateService.update(giftCertificate);
-        log.info("Certificate was successfully updated...");
-        return new ResponseData<>(HttpStatus.OK, "Certificate was successfully updated!");
+    @PatchMapping("/{id}/price")
+    public GiftCertificateDTO updatePriceById(@PathVariable Long id,
+                                              @RequestBody GiftCertificateDTO giftCertificateDTO) {
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+        GiftCertificateValidator.validatePrice(giftCertificateDTO.getPrice());
+
+        GiftCertificateDTO giftCertificate = giftCertificateService.updatePriceById(id, giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
+    }
+
+    /**
+     * Updates a gift certificate by its ID.
+     *
+     * @param id                  The ID of the gift certificate.
+     * @param giftCertificateDTO The {@link GiftCertificateDTO} containing the updates.
+     * @return The updated {@link GiftCertificateDTO}.
+     */
+    @PatchMapping("/{id}")
+    public GiftCertificateDTO update(@PathVariable Long id,
+                                     @RequestBody GiftCertificateDTO giftCertificateDTO) {
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+        GiftCertificateValidator.validate(giftCertificateDTO);
+        GiftCertificateDTO giftCertificate = giftCertificateService.update(id, giftCertificateDTO);
+        giftCertificateHateoasAdder.addLinksToEntity(giftCertificate);
+        return giftCertificate;
     }
 
     /**
      * Deletes a gift certificate by its ID.
-     * @param id The ID of the gift certificate to be deleted.
-     * @return ResponseData indicating the success of the deletion.
-     * @throws NotFoundException if the gift certificate to be deleted is not found.
-     * @throws DataModificationException if an error occurs during gift certificate deletion.
+     *
+     * @param id The ID of the gift certificate to delete.
+     * @return A {@link MessageHolder} indicating the result of the deletion.
      */
-    @DeleteMapping(value = "/{id}")
-    public ResponseData<Object> deleteById(@PathVariable("id") Long id)
-            throws NotFoundException, DataModificationException {
-        log.info("Processing delete request for gift certificate by id...");
-        giftCertificateService.delete(id);
-        log.info("Gift certificate has been successfully deleted...");
-        return new ResponseData<>(HttpStatus.OK, "Gift certificate has been successfully deleted!");
+    @DeleteMapping("/{id}")
+    public MessageHolder deleteById(@PathVariable Long id) {
+        CustomValidator.validateId(GiftCertificateField.ID, id);
+
+        giftCertificateService.deleteById(id);
+        MessageHolder messageHolder = new MessageHolder(
+                HttpStatus.OK, "gift certificate has been successfully deleted");
+        messageHolderHateoasAdder.addLinksToEntity(messageHolder);
+        return messageHolder;
     }
 }

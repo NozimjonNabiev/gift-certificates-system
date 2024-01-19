@@ -1,0 +1,19 @@
+group 'com.epam.esm'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+bootRun {
+    mainClass = 'com.epam.esm.GiftCertificatesSystemApplication'
+}
+
+dependencies {
+    implementation project(path: ":service")
+    implementation project(path: ":repository")
+}
+
+test {
+    useJUnitPlatform()
+}

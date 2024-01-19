@@ -1,0 +1,91 @@
+package com.epam.esm.controller;
+
+import com.epam.esm.dto.TagDTO;
+import com.epam.esm.dto.UserDTO;
+import com.epam.esm.hateoas.HateoasAdder;
+import com.epam.esm.service.TagService;
+import com.epam.esm.service.UserService;
+import com.epam.esm.util.enums.UserField;
+import com.epam.esm.validator.CustomValidator;
+import com.epam.esm.validator.PaginationValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * {@code UserController} is a Spring MVC RestController class that handles
+ * HTTP requests related to users. It provides endpoints for retrieving users,
+ * finding a user's most used tag, and retrieving a user by ID.
+ *
+ * <p>The class is annotated with {@link RestController}, {@link RequiredArgsConstructor},
+ * and {@link RequestMapping}, indicating that it is a controller component with
+ * constructor-based dependency injection and a base request mapping of "/api/users".
+ *
+ * <p>Endpoints include:
+ * <ul>
+ *     <li>{@code GET /api/users}: Retrieves all users with pagination.</li>
+ *     <li>{@code GET /api/users/{id}}: Retrieves a user by its ID.</li>
+ *     <li>{@code GET /api/users/{id}/most-used}: Retrieves the most used tag of a user
+ *     with the highest order cost.</li>
+ * </ul>
+ *
+ * <p>Response types include {@link UserDTO} for user-related operations and
+ * {@link TagDTO} for the most used tag operation.
+ *
+ */
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/users")
+public class UserController {
+    private final UserService userService;
+    private final TagService tagService;
+    private final HateoasAdder<UserDTO> userHateoasAdder;
+    private final HateoasAdder<TagDTO> tagHateoasAdder;
+
+    /**
+     * Retrieves all users with pagination.
+     *
+     * @param page The page number for pagination.
+     * @param size The number of items per page.
+     * @return A list of {@link UserDTO}.
+     */
+    @GetMapping
+    public List<UserDTO> getAllByPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        PaginationValidator.validate(page, size);
+
+        List<UserDTO> users = userService.findAllByPage(page, size);
+        userHateoasAdder.addLinksToEntityList(users);
+        return users;
+    }
+
+    /**
+     * Retrieves a user by its ID.
+     *
+     * @param id The ID of the user.
+     * @return The {@link UserDTO} for the specified ID.
+     */
+    @GetMapping("/{id}")
+    public UserDTO getById(@PathVariable long id) {
+        CustomValidator.validateId(UserField.ID, id);
+
+        UserDTO user = userService.findById(id);
+        userHateoasAdder.addLinksToEntity(user);
+        return user;
+    }
+
+    /**
+     * Retrieves the most used tag of a user with the highest order cost.
+     *
+     * @param id The ID of the user.
+     * @return The {@link TagDTO} representing the most used tag.
+     */
+    @GetMapping("/{id}/most-used-tag")
+    public List<TagDTO> getMostUsedTag(@PathVariable Long id) {
+        List<TagDTO> tag = tagService.findMostUsedTagOfUserWithHighestOrderCost(id);
+        tagHateoasAdder.addLinksToEntityList(tag);
+        return tag;
+    }
+}

@@ -2,32 +2,26 @@ package com.epam.esm.util.mapper;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.service.impl.GiftCertificateServiceImpl;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.TreeSet;
 
 /**
- * Mapper to convert GiftCertificate entity to DTO and vice versa
+ * Mapper interface for converting {@link GiftCertificate} entities to {@link GiftCertificateDTO} DTOs.
+ *
  */
-@Mapper(componentModel = "spring", uses = {GiftCertificateServiceImpl.class})
+@Mapper(componentModel = "spring", imports = {ArrayList.class, TreeSet.class})
 public interface GiftCertificateMapper {
 
-    @Mapping(target = "createDate", expression = "java(dateToString(certificate.getCreateDate()))")
-    @Mapping(target = "lastUpdateDate", expression = "java(dateToString(certificate.getLastUpdateDate()))")
-    GiftCertificateDTO toGiftCertificateDTO(GiftCertificate certificate);
-
-    @Mapping(target = "createDate", expression = "java(stringToDate(certificateDTO.getCreateDate()))")
-    @Mapping(target = "lastUpdateDate", expression = "java(stringToDate(certificateDTO.getLastUpdateDate()))")
-    GiftCertificate toGiftCertificate(GiftCertificateDTO certificateDTO);
-
-    default String dateToString(LocalDateTime localDateTime) {
-        return localDateTime == null ? null : DateTimeFormatter.ISO_DATE_TIME.format(localDateTime);
-    }
-
-    default LocalDateTime stringToDate(String localDateTime) {
-        return localDateTime == null ? null : LocalDateTime.parse(localDateTime, DateTimeFormatter.ISO_DATE_TIME);
-    }
+    /**
+     * Converts a {@link GiftCertificate} entity to a {@link GiftCertificateDTO} DTO.
+     *
+     * @param giftCertificate The source GiftCertificate entity.
+     * @return The mapped GiftCertificateDTO.
+     */
+    @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    GiftCertificateDTO toGiftCertificateDTO(GiftCertificate giftCertificate);
 }

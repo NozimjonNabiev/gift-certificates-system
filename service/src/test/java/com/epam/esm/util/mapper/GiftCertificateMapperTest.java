@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static com.epam.esm.util.ServiceTestEntityHolder.*;
+import static com.epam.esm.util.TestDataFactory.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -23,23 +23,17 @@ class GiftCertificateMapperTest {
     }
 
     @Test
-    public void shouldMapCertificatesCorrectlyTest() {
-        // Test mapping from GiftCertificateDTO to GiftCertificate and vice versa
-        assertEquals(giftCertificate, giftCertificateMapper.toGiftCertificate(giftCertificateDTO));
-        assertEquals(giftCertificateDTO, giftCertificateMapper.toGiftCertificateDTO(giftCertificate));
+    void shouldMapGiftCertificatesCorrectlyTest() {
+        assertEquals(getGiftCertificateDTO(), giftCertificateMapper.toGiftCertificateDTO(getGiftCertificate()));
     }
 
     @Test
-    public void shouldReturnNullIfNullPassedTest() {
-        // Test if null input returns null for both mapping methods
-        assertNull(giftCertificateMapper.toGiftCertificate(null));
+    void shouldReturnNullIfNullPassedTest() {
         assertNull(giftCertificateMapper.toGiftCertificateDTO(null));
     }
 
     @Test
-    public void shouldReturnNullObjectIfNullObjectPassedTest() {
-        // Test if null GiftCertificate or GiftCertificateDTO object returns respective null object
-        assertEquals(nullGiftCertificate, giftCertificateMapper.toGiftCertificate(nullGiftCertificateDTO));
-        assertEquals(nullGiftCertificateDTO, giftCertificateMapper.toGiftCertificateDTO(nullGiftCertificate));
+    void shouldReturnNullObjectIfNullObjectPassedTest() {
+        assertEquals(getNullGiftCertificateDTO(), giftCertificateMapper.toGiftCertificateDTO(getNullGiftCertificate()));
     }
 }
