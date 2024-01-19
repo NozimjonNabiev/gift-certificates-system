@@ -3,7 +3,11 @@ package com.epam.esm.validator;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.ValidationException;
+
 import com.epam.esm.util.enums.field.GiftCertificateField;
+
+import com.epam.esm.util.enums.GiftCertificateField;
+
 import lombok.experimental.UtilityClass;
 
 import java.util.Set;

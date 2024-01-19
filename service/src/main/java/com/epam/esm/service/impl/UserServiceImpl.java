@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+<<<<<<< HEAD
 import com.epam.esm.dto.TokenDTO;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.Token;
@@ -25,6 +26,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+=======
+import com.epam.esm.dto.UserDTO;
+import com.epam.esm.repository.UserRepository;
+import com.epam.esm.service.UserService;
+import com.epam.esm.util.Pagination;
+import com.epam.esm.util.mapper.UserMapper;
+import lombok.RequiredArgsConstructor;
+>>>>>>> adc8c58a1cab180da67dc263d51083f96b0abfa8
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,11 +46,14 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+<<<<<<< HEAD
     private final TokenRepository tokenRepository;
     private final TokenMapper tokenMapper;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+=======
+>>>>>>> adc8c58a1cab180da67dc263d51083f96b0abfa8
 
     /**
      * @inheritDoc
@@ -60,6 +72,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO findById(Long id) {
         return userMapper.toUserDTO(userRepository.findById(id));
     }
+<<<<<<< HEAD
 
     @Override
     @Transactional
@@ -105,5 +118,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
+=======
+>>>>>>> adc8c58a1cab180da67dc263d51083f96b0abfa8
 }
 

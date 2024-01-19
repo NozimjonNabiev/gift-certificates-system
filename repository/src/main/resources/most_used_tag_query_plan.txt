@@ -30,6 +30,9 @@
 | Planning Time: 7.960 ms |
 | Execution Time: 1.322 ms |
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> adc8c58a1cab180da67dc263d51083f96b0abfa8
 
 Query Execution Plan Description:
 
@@ -71,5 +74,8 @@ The following is a breakdown of the query execution plan outlining the steps tak
     - Reflects the total time taken for query execution.
 
 The query is optimized for efficiency, utilizing various index scans, nested loops, and aggregation methods to extract the most used tag for a user with the highest order cost.
+<<<<<<< HEAD
 =======
 >>>>>>> c576c261b42121d30f245e3f0e2765334a192f74
+=======
+>>>>>>> adc8c58a1cab180da67dc263d51083f96b0abfa8

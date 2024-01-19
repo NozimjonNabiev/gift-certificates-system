@@ -9,9 +9,13 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class CustomValidator {
+
     private final String ONLY_LETTERS = "^[a-zA-Z]*$";
     private static final String ONLY_LETTERS_AND_SPACES = "^[a-zA-Z ]*$";
     private final String AT_LEAST_ONE_UPPERCASE_LETTER_LOWERCASE_LETTER_NUMBER_AND_SPECIAL_CHARACTER = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
+
+    private static final String ONLY_LETTERS_AND_SPACES = "^[a-zA-Z ]*$";
+
 
     /**
      * Validates ID parameter to ensure that it is not null and is positive.

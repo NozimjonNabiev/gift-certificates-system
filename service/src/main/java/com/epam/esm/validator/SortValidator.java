@@ -1,7 +1,11 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.exception.ValidationException;
+
 import com.epam.esm.util.enums.field.SortField;
+
+import com.epam.esm.util.enums.SortField;
+
 import lombok.experimental.UtilityClass;
 
 /**

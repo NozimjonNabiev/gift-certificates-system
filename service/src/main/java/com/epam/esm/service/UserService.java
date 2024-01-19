@@ -1,8 +1,12 @@
 package com.epam.esm.service;
 
+
 import com.epam.esm.dto.TokenDTO;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.User;
+
+import com.epam.esm.dto.UserDTO;
+
 
 import java.util.List;
 
@@ -44,4 +48,5 @@ public interface UserService {
      * @return The access token for the signed-in user.
      */
     TokenDTO signIn(User user);
+
 }

@@ -1,7 +1,11 @@
 package com.epam.esm.validator;
 
 import com.epam.esm.exception.ValidationException;
+
 import com.epam.esm.util.enums.field.PaginationField;
+
+import com.epam.esm.util.enums.PaginationField;
+
 import lombok.experimental.UtilityClass;
 
 /**

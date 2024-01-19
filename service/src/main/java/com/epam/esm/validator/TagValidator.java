@@ -2,7 +2,11 @@ package com.epam.esm.validator;
 
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.exception.ValidationException;
+
 import com.epam.esm.util.enums.field.TagField;
+
+import com.epam.esm.util.enums.TagField;
+
 import lombok.experimental.UtilityClass;
 
 /**
