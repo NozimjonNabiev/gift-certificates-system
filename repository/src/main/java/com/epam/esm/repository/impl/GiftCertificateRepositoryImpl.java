@@ -19,18 +19,8 @@ import java.util.*;
  */
 @Repository
 public class GiftCertificateRepositoryImpl implements GiftCertificateRepository {
-
     @PersistenceContext
     private EntityManager entityManager;
-    private static final Map<String, Comparator<GiftCertificate>> giftCertificateComparators = Map.of(
-            "id", Comparator.comparing(GiftCertificate::getId),
-            "name", Comparator.comparing(GiftCertificate::getName),
-            "description", Comparator.comparing(GiftCertificate::getDescription),
-            "price", Comparator.comparing(GiftCertificate::getPrice),
-            "duration", Comparator.comparing(GiftCertificate::getDuration),
-            "createDate", Comparator.comparing(GiftCertificate::getCreateDate),
-            "lastUpdateDate", Comparator.comparing(GiftCertificate::getLastUpdateDate)
-    );
 
     /**
      * @inheritDoc
@@ -89,20 +79,18 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
             finalPredicate = criteriaBuilder.and(finalPredicate, searchPredicate);
         }
 
-        // Sorting
-        if (!searchFilter.sortType().isEmpty()) {
-            Comparator<GiftCertificate> comparator = giftCertificateComparators.get(searchFilter.sortType());
-            if (comparator != null) {
-                List<GiftCertificate> certificates = entityManager.createQuery(criteriaQuery).getResultList();
-                certificates.removeIf(giftCertificate -> !giftCertificate.getTags().containsAll(searchFilter.tags()));
-                certificates.sort(searchFilter.isDescending() ? comparator.reversed() : comparator);
-                return certificates;
-            }
-        }
-
         criteriaQuery.where(finalPredicate);
 
+        // Sorting
+        if (!searchFilter.sortType().isEmpty()) {
+            Path<Object> sortPath = root.get(searchFilter.sortType());
+            criteriaQuery.orderBy(searchFilter.isDescending() ? criteriaBuilder.desc(sortPath) : criteriaBuilder.asc(sortPath));
+        }
+
         TypedQuery<GiftCertificate> query = entityManager.createQuery(criteriaQuery);
+        query.setFirstResult(pagination.getOffset());
+        query.setMaxResults(pagination.getLimit());
+
         return query.getResultList();
     }
 

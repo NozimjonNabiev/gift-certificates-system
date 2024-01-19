@@ -1,5 +1,6 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.util.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,10 @@ public class User implements Identifiable{
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "role")
+    @Enumerated(value = EnumType.STRING)
+    private UserRole role;
 
     @Column(name = "first_name")
     private String firstName;

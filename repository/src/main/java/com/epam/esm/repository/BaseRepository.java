@@ -2,6 +2,7 @@ package com.epam.esm.repository;
 
 import com.epam.esm.entity.Identifiable;
 import com.epam.esm.util.Pagination;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public interface BaseRepository<T extends Identifiable> {
      * @param entity The entity to be saved or updated.
      */
     default void save(T entity) {
-        // Implementation specific to the repository.
+        throw new NotImplementedException("Save method not implemented in this repository");
     }
 
     /**
@@ -44,6 +45,6 @@ public interface BaseRepository<T extends Identifiable> {
      * @param entity The entity to be deleted from the repository.
      */
     default void delete(T entity) {
-        // Implementation specific to the repository.
+        throw new NotImplementedException("Delete method not implemented in this repository");
     }
 }
