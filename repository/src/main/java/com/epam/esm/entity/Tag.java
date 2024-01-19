@@ -13,7 +13,7 @@ import java.util.Set;
 @EqualsAndHashCode(exclude = "giftCertificates")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tag implements Identifiable, Comparable<Tag>{
+public class Tag implements Identifiable, Comparable<Tag> {
     @Id
     @Column(name = "tag_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

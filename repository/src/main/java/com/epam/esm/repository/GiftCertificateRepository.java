@@ -9,8 +9,6 @@ import java.util.List;
 /**
  * Repository interface for managing {@link GiftCertificate} entities.
  *
- * @version 1.0
- * @since 2024-01-16
  */
 public interface GiftCertificateRepository extends BaseRepository<GiftCertificate> {
 

@@ -44,8 +44,9 @@ public class TagServiceImpl implements TagService {
      * @inheritDoc
      */
     @Override
-    public TagDTO findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
-        return tagMapper.toTagDTO(tagRepository.findMostUsedTagOfUserWithHighestOrderCost(userId));
+    public List<TagDTO> findMostUsedTagOfUserWithHighestOrderCost(Long userId) {
+        return tagRepository.findMostUsedTagOfUserWithHighestOrderCost(userId).stream()
+                .map(tagMapper::toTagDTO).toList();
     }
 
     /**

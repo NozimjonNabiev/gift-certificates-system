@@ -1,6 +1,8 @@
 package com.epam.esm.service;
 
+import com.epam.esm.dto.TokenDTO;
 import com.epam.esm.dto.UserDTO;
+import com.epam.esm.entity.User;
 
 import java.util.List;
 
@@ -26,4 +28,20 @@ public interface UserService {
      * @return The user with the given ID.
      */
     UserDTO findById(Long id);
+
+    /**
+     * Signs up a user and returns the corresponding access token.
+     *
+     * @param user The user to sign up.
+     * @return The access token for the signed-up user.
+     */
+    TokenDTO signUp(User user);
+
+    /**
+     * Signs in a user and returns the corresponding access token.
+     *
+     * @param user The user to sign in.
+     * @return The access token for the signed-in user.
+     */
+    TokenDTO signIn(User user);
 }

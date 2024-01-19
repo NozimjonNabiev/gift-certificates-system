@@ -4,6 +4,7 @@ import com.epam.esm.entity.User;
 import com.epam.esm.util.Pagination;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing {@link User} entities.
@@ -26,4 +27,28 @@ public interface UserRepository extends BaseRepository<User> {
      * @return The user with the given ID.
      */
     User findById(Long id);
+
+    /**
+     * Saves a new user to the database.
+     *
+     * @param user The user to be saved.
+     * @return The saved user entity.
+     */
+    User saveUser(User user);
+
+    /**
+     * Retrieves a list of users whose password does not match the specified regex pattern.
+     *
+     * @param regex The regex pattern for password matching.
+     * @return A list of users whose password does not match the given regex.
+     */
+    List<User> findByPasswordNotMatchingRegex(String regex);
+
+    /**
+     * Retrieves a user by username.
+     *
+     * @param username The username of the user.
+     * @return An optional containing the user with the given username, if found.
+     */
+    Optional<User> findByUsername(String username);
 }
