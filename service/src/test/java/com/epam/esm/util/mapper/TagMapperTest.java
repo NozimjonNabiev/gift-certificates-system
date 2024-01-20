@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static com.epam.esm.util.ServiceTestEntityHolder.*;
+import static com.epam.esm.util.TestDataFactory.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -23,23 +23,20 @@ class TagMapperTest {
     }
 
     @Test
-    public void shouldMapTagsCorrectlyTest() {
-        // Test mapping from TagDTO to Tag and vice versa
-        assertEquals(tag, tagMapper.toTag(tagDTO));
-        assertEquals(tagDTO, tagMapper.toTagDTO(tag));
+    void shouldMapTagsCorrectlyTest() {
+        assertEquals(getTag(), tagMapper.toTag(getTagDTO()));
+        assertEquals(getTagDTO(), tagMapper.toTagDTO(getTag()));
     }
 
     @Test
-    public void shouldReturnNullIfNullPassedTest() {
-        // Test if null input returns null for both mapping methods
+    void shouldReturnNullIfNullPassedTest() {
         assertNull(tagMapper.toTag(null));
         assertNull(tagMapper.toTagDTO(null));
     }
 
     @Test
-    public void shouldReturnNullObjectIfNullObjectPassedTest() {
-        // Test if null Tag or TagDTO object returns respective null object
-        assertEquals(nullTag, tagMapper.toTag(nullTagDTO));
-        assertEquals(nullTagDTO, tagMapper.toTagDTO(nullTag));
+    void shouldReturnNullObjectIfNullObjectPassedTest() {
+        assertEquals(getNullTag(), tagMapper.toTag(getNullTagDTO()));
+        assertEquals(getNullTagDTO(), tagMapper.toTagDTO(getNullTag()));
     }
 }
